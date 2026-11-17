@@ -1,0 +1,95 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CHINO AI</title>
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;background:#101522;color:white;
+ font-family:Arial,sans-serif;
+}
+header{
+ background:#171f30;padding:22px;
+ text-align:center;border-bottom:1px solid #303b50;
+}
+header h1{color:#55e4d2;margin:0}
+header p{color:#aab5c8}
+main{max-width:650px;margin:25px auto;padding:15px}
+#chat{
+ height:55vh;overflow-y:auto;
+ background:#192235;border-radius:15px;
+ padding:15px;
+}
+.msg{padding:12px;margin:10px 0;border-radius:12px;
+ line-height:1.5;white-space:pre-wrap}
+.bot{background:#29364c}
+.user{background:#087f79;text-align:right}
+form{display:flex;gap:8px;margin-top:15px}
+input{
+ flex:1;min-width:0;padding:15px;
+ border-radius:10px;border:0;font-size:16px;
+}
+button{
+ background:#55e4d2;color:#101522;
+ border:0;border-radius:10px;padding:14px;
+ font-weight:bold;
+}
+</style>
+</head>
+<body>
+<header>
+<h1>CHINO AI</h1>
+<p>Ton assistant intelligent personnel</p>
+</header>
+<main>
+<div id="chat">
+<div class="msg bot">
+Salut ! 👋 Je suis CHINO AI.
+Comment puis-je t'aider aujourd'hui ?
+</div>
+</div>
+<form id="form">
+<input id="message" placeholder="Écris ton message..." required>
+<button type="submit">Envoyer</button>
+</form>
+</main>
+<script>
+const form=document.getElementById("form");
+const input=document.getElementById("message");
+const chat=document.getElementById("chat");
+
+form.addEventListener("submit",async(e)=>{
+ e.preventDefault();
+ const message=input.value.trim();
+ if(!message)return;
+ addMessage(message,"user");
+ input.value="";
+ const loading=addMessage("CHINO AI réfléchit...","bot");
+ try{
+  const response=await fetch("/api/chat",{
+   method:"POST",
+   headers:{"Content-Type":"application/json"},
+   body:JSON.stringify({message})
+  });
+  const data=await response.json();
+  if(!response.ok)throw new Error(data.error||"Erreur serveur");
+  loading.textContent=data.reply||"Aucune réponse reçue.";
+ }catch(error){
+  loading.textContent="Le serveur IA n'est pas encore configuré. Nous allons le connecter à l'étape suivante.";
+ }
+});
+
+function addMessage(text,type){
+ const div=document.createElement("div");
+ div.className="msg "+type;
+ div.textContent=text;
+ chat.appendChild(div);
+ chat.scrollTop=chat.scrollHeight;
+ return div;
+}
+</script>
+</body>
+</html>
